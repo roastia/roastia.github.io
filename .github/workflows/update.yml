@@ -1,0 +1,55 @@
+name: 自家焙煎珈琲店データ自動更新
+
+on:
+  schedule:
+    - cron: '0 18 * * 0'   # 毎週日曜 18:00 UTC = 月曜 3:00 JST
+  workflow_dispatch:         # GitHubから手動実行も可
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+
+    steps:
+      - name: リポジトリ取得
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Python 3.11 セットアップ
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: 依存パッケージインストール
+        run: |
+          pip install playwright tqdm python-dotenv
+          python -m playwright install chromium --with-deps
+
+      - name: outputフォルダ作成
+        run: mkdir -p output
+
+      - name: Google Mapsスクレイピング（全国・dry-run）
+        run: python scraper_google_maps.py --dry-run
+        env:
+          PYTHONUNBUFFERED: "1"
+
+      - name: shops.json変換
+        run: |
+          python convert_to_web.py output/shops_*.json --out shops.json
+          cp shops.json shops-full.json
+          python -c "
+          import json
+          shops = json.load(open('shops.json'))
+          lite = [{k: s[k] for k in ['id','name','pref','city','lat','lng','rating','tags'] if k in s} for s in shops]
+          json.dump(lite, open('shops-lite.json','w'), ensure_ascii=False)
+          print(f'shops.json: {len(shops)}件')
+          "
+
+      - name: コミット＆プッシュ
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add shops.json shops-lite.json shops-full.json
+          git diff --staged --quiet || git commit -m "data: 自動更新 $(date +'%Y-%m-%d')"
+          git push
