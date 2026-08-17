@@ -3,36 +3,85 @@ name: 自家焙煎珈琲店データ自動更新
 on:
   schedule:
     - cron: '0 18 * * 0'   # 毎週日曜 18:00 UTC = 月曜 3:00 JST
-  workflow_dispatch:         # GitHubから手動実行も可
+  workflow_dispatch:
 
 jobs:
+  # ── 地方別スクレイピング（順番に実行・各ジョブ約1〜2時間）──────────
   scrape:
     runs-on: ubuntu-latest
-    timeout-minutes: 360
+    timeout-minutes: 180
+    strategy:
+      max-parallel: 1   # Google対策：1ジョブずつ順番に
+      matrix:
+        include:
+          - region: hokkaido_tohoku
+            prefs: "北海道 青森県 岩手県 宮城県 秋田県 山形県 福島県"
+          - region: kanto
+            prefs: "茨城県 栃木県 群馬県 埼玉県 千葉県 東京都 神奈川県"
+          - region: chubu
+            prefs: "新潟県 富山県 石川県 福井県 山梨県 長野県 岐阜県 静岡県 愛知県 三重県"
+          - region: kinki
+            prefs: "滋賀県 京都府 大阪府 兵庫県 奈良県 和歌山県"
+          - region: chugoku_shikoku
+            prefs: "鳥取県 島根県 岡山県 広島県 山口県 徳島県 香川県 愛媛県 高知県"
+          - region: kyushu_okinawa
+            prefs: "福岡県 佐賀県 長崎県 熊本県 大分県 宮崎県 鹿児島県 沖縄県"
 
     steps:
-      - name: リポジトリ取得
-        uses: actions/checkout@v4
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/checkout@v4
 
-      - name: Python 3.11 セットアップ
-        uses: actions/setup-python@v5
+      - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
 
-      - name: 依存パッケージインストール
+      - name: 依存インストール
         run: |
           pip install playwright tqdm python-dotenv
           python -m playwright install chromium --with-deps
 
-      - name: outputフォルダ作成
-        run: mkdir -p output
-
-      - name: Google Mapsスクレイピング（全国・dry-run）
-        run: python scraper_google_maps.py --dry-run
+      - name: スクレイピング（${{ matrix.region }}）
+        run: |
+          mkdir -p output
+          for pref in ${{ matrix.prefs }}; do
+            echo "=== $pref ==="
+            python scraper_google_maps.py --dry-run --pref "$pref"
+          done
         env:
           PYTHONUNBUFFERED: "1"
+
+      - name: アーティファクト保存
+        uses: actions/upload-artifact@v4
+        with:
+          name: shops-${{ matrix.region }}
+          path: output/shops_*.json
+          retention-days: 1
+
+  # ── マージ＆コミット（全地方完了後に実行）────────────────────────
+  merge:
+    needs: scrape
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - run: pip install playwright tqdm python-dotenv
+
+      - name: アーティファクト取得
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts/
+
+      - name: outputに集約
+        run: |
+          mkdir -p output
+          find artifacts/ -name "shops_*.json" -exec cp {} output/ \;
+          echo "集約ファイル数: $(ls output/shops_*.json | wc -l)"
 
       - name: shops.json変換
         run: |
@@ -41,9 +90,10 @@ jobs:
           python -c "
           import json
           shops = json.load(open('shops.json'))
-          lite = [{k: s[k] for k in ['id','name','pref','city','lat','lng','rating','tags'] if k in s} for s in shops]
+          keys = ['id','name','pref','city','lat','lng','rating','tags']
+          lite = [{k: s[k] for k in keys if k in s} for s in shops]
           json.dump(lite, open('shops-lite.json','w'), ensure_ascii=False)
-          print(f'shops.json: {len(shops)}件')
+          print(f'完了: {len(shops)}件')
           "
 
       - name: コミット＆プッシュ
