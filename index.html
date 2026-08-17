@@ -601,6 +601,9 @@ footer a:hover{color:var(--gold);}
 </div>
 
 <script>
+if (location.pathname.endsWith('/index.html')) {
+  location.replace(location.href.replace('/index.html', '/'));
+}
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => navigator.serviceWorker.register('/sw.js').catch(()=>{}));
 }
