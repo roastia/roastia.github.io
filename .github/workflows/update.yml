@@ -6,26 +6,719 @@ on:
   workflow_dispatch:
 
 jobs:
-  # ── 地方別スクレイピング（順番に実行・各ジョブ約1〜2時間）──────────
+  # ── 市区町村別スクレイピング（235ジョブ・1市区町村ずつ順番に実行）──────────
   scrape:
     runs-on: ubuntu-latest
-    timeout-minutes: 180
+    timeout-minutes: 120
     strategy:
       max-parallel: 1   # Google対策：1ジョブずつ順番に
       matrix:
         include:
-          - region: hokkaido_tohoku
-            prefs: "北海道 青森県 岩手県 宮城県 秋田県 山形県 福島県"
-          - region: kanto
-            prefs: "茨城県 栃木県 群馬県 埼玉県 千葉県 東京都 神奈川県"
-          - region: chubu
-            prefs: "新潟県 富山県 石川県 福井県 山梨県 長野県 岐阜県 静岡県 愛知県 三重県"
-          - region: kinki
-            prefs: "滋賀県 京都府 大阪府 兵庫県 奈良県 和歌山県"
-          - region: chugoku_shikoku
-            prefs: "鳥取県 島根県 岡山県 広島県 山口県 徳島県 香川県 愛媛県 高知県"
-          - region: kyushu_okinawa
-            prefs: "福岡県 佐賀県 長崎県 熊本県 大分県 宮崎県 鹿児島県 沖縄県"
+          - region: hokkaido_sapporo
+            pref: "北海道"
+            area: "札幌市"
+          - region: hokkaido_asahikawa
+            pref: "北海道"
+            area: "旭川市"
+          - region: hokkaido_hakodate
+            pref: "北海道"
+            area: "函館市"
+          - region: hokkaido_obihiro
+            pref: "北海道"
+            area: "帯広市"
+          - region: hokkaido_kushiro
+            pref: "北海道"
+            area: "釧路市"
+          - region: aomori_aomori_c
+            pref: "青森県"
+            area: "青森市"
+          - region: aomori_hirosaki
+            pref: "青森県"
+            area: "弘前市"
+          - region: aomori_hachinohe
+            pref: "青森県"
+            area: "八戸市"
+          - region: aomori_towada
+            pref: "青森県"
+            area: "十和田市"
+          - region: aomori_mutsu
+            pref: "青森県"
+            area: "むつ市"
+          - region: iwate_morioka
+            pref: "岩手県"
+            area: "盛岡市"
+          - region: iwate_hanamaki
+            pref: "岩手県"
+            area: "花巻市"
+          - region: iwate_ichinoseki
+            pref: "岩手県"
+            area: "一関市"
+          - region: iwate_oshu
+            pref: "岩手県"
+            area: "奥州市"
+          - region: iwate_kamaishi
+            pref: "岩手県"
+            area: "釜石市"
+          - region: miyagi_sendai
+            pref: "宮城県"
+            area: "仙台市"
+          - region: miyagi_ishinomaki
+            pref: "宮城県"
+            area: "石巻市"
+          - region: miyagi_osaki
+            pref: "宮城県"
+            area: "大崎市"
+          - region: miyagi_kesennuma
+            pref: "宮城県"
+            area: "気仙沼市"
+          - region: miyagi_shiogama
+            pref: "宮城県"
+            area: "塩竈市"
+          - region: akita_akita_c
+            pref: "秋田県"
+            area: "秋田市"
+          - region: akita_yokote
+            pref: "秋田県"
+            area: "横手市"
+          - region: akita_daisen
+            pref: "秋田県"
+            area: "大仙市"
+          - region: akita_noshiro
+            pref: "秋田県"
+            area: "能代市"
+          - region: akita_odate
+            pref: "秋田県"
+            area: "大館市"
+          - region: yamagata_yamagata_c
+            pref: "山形県"
+            area: "山形市"
+          - region: yamagata_yonezawa
+            pref: "山形県"
+            area: "米沢市"
+          - region: yamagata_tsuruoka
+            pref: "山形県"
+            area: "鶴岡市"
+          - region: yamagata_sakata
+            pref: "山形県"
+            area: "酒田市"
+          - region: yamagata_shinjo
+            pref: "山形県"
+            area: "新庄市"
+          - region: fukushima_fukushima_c
+            pref: "福島県"
+            area: "福島市"
+          - region: fukushima_koriyama
+            pref: "福島県"
+            area: "郡山市"
+          - region: fukushima_iwaki
+            pref: "福島県"
+            area: "いわき市"
+          - region: fukushima_aizuwakamatsu
+            pref: "福島県"
+            area: "会津若松市"
+          - region: fukushima_shirakawa
+            pref: "福島県"
+            area: "白河市"
+          - region: ibaraki_mito
+            pref: "茨城県"
+            area: "水戸市"
+          - region: ibaraki_tsukuba
+            pref: "茨城県"
+            area: "つくば市"
+          - region: ibaraki_hitachi
+            pref: "茨城県"
+            area: "日立市"
+          - region: ibaraki_tsuchiura
+            pref: "茨城県"
+            area: "土浦市"
+          - region: ibaraki_koga
+            pref: "茨城県"
+            area: "古河市"
+          - region: tochigi_utsunomiya
+            pref: "栃木県"
+            area: "宇都宮市"
+          - region: tochigi_oyama
+            pref: "栃木県"
+            area: "小山市"
+          - region: tochigi_tochigi_c
+            pref: "栃木県"
+            area: "栃木市"
+          - region: tochigi_ashikaga
+            pref: "栃木県"
+            area: "足利市"
+          - region: tochigi_nasushiobara
+            pref: "栃木県"
+            area: "那須塩原市"
+          - region: gunma_maebashi
+            pref: "群馬県"
+            area: "前橋市"
+          - region: gunma_takasaki
+            pref: "群馬県"
+            area: "高崎市"
+          - region: gunma_isesaki
+            pref: "群馬県"
+            area: "伊勢崎市"
+          - region: gunma_ota
+            pref: "群馬県"
+            area: "太田市"
+          - region: gunma_kiryu
+            pref: "群馬県"
+            area: "桐生市"
+          - region: saitama_saitama_c
+            pref: "埼玉県"
+            area: "さいたま市"
+          - region: saitama_kawaguchi
+            pref: "埼玉県"
+            area: "川口市"
+          - region: saitama_tokorozawa
+            pref: "埼玉県"
+            area: "所沢市"
+          - region: saitama_kawagoe
+            pref: "埼玉県"
+            area: "川越市"
+          - region: saitama_koshigaya
+            pref: "埼玉県"
+            area: "越谷市"
+          - region: chiba_chiba_c
+            pref: "千葉県"
+            area: "千葉市"
+          - region: chiba_funabashi
+            pref: "千葉県"
+            area: "船橋市"
+          - region: chiba_ichikawa
+            pref: "千葉県"
+            area: "市川市"
+          - region: chiba_matsudo
+            pref: "千葉県"
+            area: "松戸市"
+          - region: chiba_kashiwa
+            pref: "千葉県"
+            area: "柏市"
+          - region: tokyo_shinjuku
+            pref: "東京都"
+            area: "新宿区"
+          - region: tokyo_shibuya
+            pref: "東京都"
+            area: "渋谷区"
+          - region: tokyo_minato
+            pref: "東京都"
+            area: "港区"
+          - region: tokyo_nakano
+            pref: "東京都"
+            area: "中野区"
+          - region: tokyo_musashino
+            pref: "東京都"
+            area: "武蔵野市"
+          - region: kanagawa_yokohama
+            pref: "神奈川県"
+            area: "横浜市"
+          - region: kanagawa_kawasaki
+            pref: "神奈川県"
+            area: "川崎市"
+          - region: kanagawa_sagamihara
+            pref: "神奈川県"
+            area: "相模原市"
+          - region: kanagawa_yokosuka
+            pref: "神奈川県"
+            area: "横須賀市"
+          - region: kanagawa_fujisawa
+            pref: "神奈川県"
+            area: "藤沢市"
+          - region: niigata_niigata_c
+            pref: "新潟県"
+            area: "新潟市"
+          - region: niigata_nagaoka
+            pref: "新潟県"
+            area: "長岡市"
+          - region: niigata_joetsu
+            pref: "新潟県"
+            area: "上越市"
+          - region: niigata_sanjo
+            pref: "新潟県"
+            area: "三条市"
+          - region: niigata_tsubame
+            pref: "新潟県"
+            area: "燕市"
+          - region: toyama_toyama_c
+            pref: "富山県"
+            area: "富山市"
+          - region: toyama_takaoka
+            pref: "富山県"
+            area: "高岡市"
+          - region: toyama_imizu
+            pref: "富山県"
+            area: "射水市"
+          - region: toyama_tonami
+            pref: "富山県"
+            area: "砺波市"
+          - region: toyama_uozu
+            pref: "富山県"
+            area: "魚津市"
+          - region: ishikawa_kanazawa
+            pref: "石川県"
+            area: "金沢市"
+          - region: ishikawa_komatsu
+            pref: "石川県"
+            area: "小松市"
+          - region: ishikawa_hakusan
+            pref: "石川県"
+            area: "白山市"
+          - region: ishikawa_kaga
+            pref: "石川県"
+            area: "加賀市"
+          - region: ishikawa_nanao
+            pref: "石川県"
+            area: "七尾市"
+          - region: fukui_fukui_c
+            pref: "福井県"
+            area: "福井市"
+          - region: fukui_tsuruga
+            pref: "福井県"
+            area: "敦賀市"
+          - region: fukui_echizen
+            pref: "福井県"
+            area: "越前市"
+          - region: fukui_sakai
+            pref: "福井県"
+            area: "坂井市"
+          - region: fukui_obama
+            pref: "福井県"
+            area: "小浜市"
+          - region: yamanashi_kofu
+            pref: "山梨県"
+            area: "甲府市"
+          - region: yamanashi_kai
+            pref: "山梨県"
+            area: "甲斐市"
+          - region: yamanashi_yamanashi_c
+            pref: "山梨県"
+            area: "山梨市"
+          - region: yamanashi_minami_alps
+            pref: "山梨県"
+            area: "南アルプス市"
+          - region: yamanashi_fuefuki
+            pref: "山梨県"
+            area: "笛吹市"
+          - region: nagano_nagano_c
+            pref: "長野県"
+            area: "長野市"
+          - region: nagano_matsumoto
+            pref: "長野県"
+            area: "松本市"
+          - region: nagano_ueda
+            pref: "長野県"
+            area: "上田市"
+          - region: nagano_iida
+            pref: "長野県"
+            area: "飯田市"
+          - region: nagano_suwa
+            pref: "長野県"
+            area: "諏訪市"
+          - region: gifu_gifu_c
+            pref: "岐阜県"
+            area: "岐阜市"
+          - region: gifu_ogaki
+            pref: "岐阜県"
+            area: "大垣市"
+          - region: gifu_kakamigahara
+            pref: "岐阜県"
+            area: "各務原市"
+          - region: gifu_tajimi
+            pref: "岐阜県"
+            area: "多治見市"
+          - region: gifu_takayama
+            pref: "岐阜県"
+            area: "高山市"
+          - region: shizuoka_shizuoka_c
+            pref: "静岡県"
+            area: "静岡市"
+          - region: shizuoka_hamamatsu
+            pref: "静岡県"
+            area: "浜松市"
+          - region: shizuoka_numazu
+            pref: "静岡県"
+            area: "沼津市"
+          - region: shizuoka_fuji
+            pref: "静岡県"
+            area: "富士市"
+          - region: shizuoka_iwata
+            pref: "静岡県"
+            area: "磐田市"
+          - region: aichi_nagoya
+            pref: "愛知県"
+            area: "名古屋市"
+          - region: aichi_toyota
+            pref: "愛知県"
+            area: "豊田市"
+          - region: aichi_okazaki
+            pref: "愛知県"
+            area: "岡崎市"
+          - region: aichi_ichinomiya
+            pref: "愛知県"
+            area: "一宮市"
+          - region: aichi_toyohashi
+            pref: "愛知県"
+            area: "豊橋市"
+          - region: mie_tsu
+            pref: "三重県"
+            area: "津市"
+          - region: mie_yokkaichi
+            pref: "三重県"
+            area: "四日市市"
+          - region: mie_suzuka
+            pref: "三重県"
+            area: "鈴鹿市"
+          - region: mie_matsusaka
+            pref: "三重県"
+            area: "松阪市"
+          - region: mie_ise
+            pref: "三重県"
+            area: "伊勢市"
+          - region: shiga_otsu
+            pref: "滋賀県"
+            area: "大津市"
+          - region: shiga_kusatsu
+            pref: "滋賀県"
+            area: "草津市"
+          - region: shiga_nagahama
+            pref: "滋賀県"
+            area: "長浜市"
+          - region: shiga_hikone
+            pref: "滋賀県"
+            area: "彦根市"
+          - region: shiga_higashiomi
+            pref: "滋賀県"
+            area: "東近江市"
+          - region: kyoto_kyoto_c
+            pref: "京都府"
+            area: "京都市"
+          - region: kyoto_uji
+            pref: "京都府"
+            area: "宇治市"
+          - region: kyoto_kameoka
+            pref: "京都府"
+            area: "亀岡市"
+          - region: kyoto_nagaokakyo
+            pref: "京都府"
+            area: "長岡京市"
+          - region: kyoto_maizuru
+            pref: "京都府"
+            area: "舞鶴市"
+          - region: osaka_osaka_c
+            pref: "大阪府"
+            area: "大阪市"
+          - region: osaka_sakai_o
+            pref: "大阪府"
+            area: "堺市"
+          - region: osaka_higashiosaka
+            pref: "大阪府"
+            area: "東大阪市"
+          - region: osaka_toyonaka
+            pref: "大阪府"
+            area: "豊中市"
+          - region: osaka_suita
+            pref: "大阪府"
+            area: "吹田市"
+          - region: hyogo_kobe
+            pref: "兵庫県"
+            area: "神戸市"
+          - region: hyogo_himeji
+            pref: "兵庫県"
+            area: "姫路市"
+          - region: hyogo_nishinomiya
+            pref: "兵庫県"
+            area: "西宮市"
+          - region: hyogo_amagasaki
+            pref: "兵庫県"
+            area: "尼崎市"
+          - region: hyogo_akashi
+            pref: "兵庫県"
+            area: "明石市"
+          - region: nara_nara_c
+            pref: "奈良県"
+            area: "奈良市"
+          - region: nara_kashihara
+            pref: "奈良県"
+            area: "橿原市"
+          - region: nara_ikoma
+            pref: "奈良県"
+            area: "生駒市"
+          - region: nara_yamatokoriyama
+            pref: "奈良県"
+            area: "大和郡山市"
+          - region: nara_tenri
+            pref: "奈良県"
+            area: "天理市"
+          - region: wakayama_wakayama_c
+            pref: "和歌山県"
+            area: "和歌山市"
+          - region: wakayama_tanabe
+            pref: "和歌山県"
+            area: "田辺市"
+          - region: wakayama_hashimoto
+            pref: "和歌山県"
+            area: "橋本市"
+          - region: wakayama_shingu
+            pref: "和歌山県"
+            area: "新宮市"
+          - region: wakayama_arita
+            pref: "和歌山県"
+            area: "有田市"
+          - region: tottori_tottori_c
+            pref: "鳥取県"
+            area: "鳥取市"
+          - region: tottori_yonago
+            pref: "鳥取県"
+            area: "米子市"
+          - region: tottori_kurayoshi
+            pref: "鳥取県"
+            area: "倉吉市"
+          - region: tottori_sakaiminato
+            pref: "鳥取県"
+            area: "境港市"
+          - region: tottori_yazu
+            pref: "鳥取県"
+            area: "八頭郡"
+          - region: shimane_matsue
+            pref: "島根県"
+            area: "松江市"
+          - region: shimane_izumo
+            pref: "島根県"
+            area: "出雲市"
+          - region: shimane_hamada
+            pref: "島根県"
+            area: "浜田市"
+          - region: shimane_masuda
+            pref: "島根県"
+            area: "益田市"
+          - region: shimane_unnan
+            pref: "島根県"
+            area: "雲南市"
+          - region: okayama_okayama_c
+            pref: "岡山県"
+            area: "岡山市"
+          - region: okayama_kurashiki
+            pref: "岡山県"
+            area: "倉敷市"
+          - region: okayama_tsuyama
+            pref: "岡山県"
+            area: "津山市"
+          - region: okayama_soja
+            pref: "岡山県"
+            area: "総社市"
+          - region: okayama_tamano
+            pref: "岡山県"
+            area: "玉野市"
+          - region: hiroshima_hiroshima_c
+            pref: "広島県"
+            area: "広島市"
+          - region: hiroshima_fukuyama
+            pref: "広島県"
+            area: "福山市"
+          - region: hiroshima_higashihiroshima
+            pref: "広島県"
+            area: "東広島市"
+          - region: hiroshima_onomichi
+            pref: "広島県"
+            area: "尾道市"
+          - region: hiroshima_kure
+            pref: "広島県"
+            area: "呉市"
+          - region: yamaguchi_yamaguchi_c
+            pref: "山口県"
+            area: "山口市"
+          - region: yamaguchi_shimonoseki
+            pref: "山口県"
+            area: "下関市"
+          - region: yamaguchi_ube
+            pref: "山口県"
+            area: "宇部市"
+          - region: yamaguchi_shunan
+            pref: "山口県"
+            area: "周南市"
+          - region: yamaguchi_hofu
+            pref: "山口県"
+            area: "防府市"
+          - region: tokushima_tokushima_c
+            pref: "徳島県"
+            area: "徳島市"
+          - region: tokushima_naruto
+            pref: "徳島県"
+            area: "鳴門市"
+          - region: tokushima_anan
+            pref: "徳島県"
+            area: "阿南市"
+          - region: tokushima_yoshinogawa
+            pref: "徳島県"
+            area: "吉野川市"
+          - region: tokushima_mima
+            pref: "徳島県"
+            area: "美馬市"
+          - region: kagawa_takamatsu
+            pref: "香川県"
+            area: "高松市"
+          - region: kagawa_marugame
+            pref: "香川県"
+            area: "丸亀市"
+          - region: kagawa_sakaide
+            pref: "香川県"
+            area: "坂出市"
+          - region: kagawa_zentsuji
+            pref: "香川県"
+            area: "善通寺市"
+          - region: kagawa_kanonji
+            pref: "香川県"
+            area: "観音寺市"
+          - region: ehime_matsuyama
+            pref: "愛媛県"
+            area: "松山市"
+          - region: ehime_imabari
+            pref: "愛媛県"
+            area: "今治市"
+          - region: ehime_niihama
+            pref: "愛媛県"
+            area: "新居浜市"
+          - region: ehime_saijo
+            pref: "愛媛県"
+            area: "西条市"
+          - region: ehime_uwajima
+            pref: "愛媛県"
+            area: "宇和島市"
+          - region: kochi_kochi_c
+            pref: "高知県"
+            area: "高知市"
+          - region: kochi_nankoku
+            pref: "高知県"
+            area: "南国市"
+          - region: kochi_shimanto
+            pref: "高知県"
+            area: "四万十市"
+          - region: kochi_konan
+            pref: "高知県"
+            area: "香南市"
+          - region: kochi_aki
+            pref: "高知県"
+            area: "安芸市"
+          - region: fukuoka_fukuoka_c
+            pref: "福岡県"
+            area: "福岡市"
+          - region: fukuoka_kitakyushu
+            pref: "福岡県"
+            area: "北九州市"
+          - region: fukuoka_kurume
+            pref: "福岡県"
+            area: "久留米市"
+          - region: fukuoka_iizuka
+            pref: "福岡県"
+            area: "飯塚市"
+          - region: fukuoka_omuta
+            pref: "福岡県"
+            area: "大牟田市"
+          - region: saga_saga_c
+            pref: "佐賀県"
+            area: "佐賀市"
+          - region: saga_karatsu
+            pref: "佐賀県"
+            area: "唐津市"
+          - region: saga_tosu
+            pref: "佐賀県"
+            area: "鳥栖市"
+          - region: saga_imari
+            pref: "佐賀県"
+            area: "伊万里市"
+          - region: saga_takeo
+            pref: "佐賀県"
+            area: "武雄市"
+          - region: nagasaki_nagasaki_c
+            pref: "長崎県"
+            area: "長崎市"
+          - region: nagasaki_sasebo
+            pref: "長崎県"
+            area: "佐世保市"
+          - region: nagasaki_isahaya
+            pref: "長崎県"
+            area: "諫早市"
+          - region: nagasaki_omura
+            pref: "長崎県"
+            area: "大村市"
+          - region: nagasaki_shimabara
+            pref: "長崎県"
+            area: "島原市"
+          - region: kumamoto_kumamoto_c
+            pref: "熊本県"
+            area: "熊本市"
+          - region: kumamoto_yatsushiro
+            pref: "熊本県"
+            area: "八代市"
+          - region: kumamoto_amakusa
+            pref: "熊本県"
+            area: "天草市"
+          - region: kumamoto_hitoyoshi
+            pref: "熊本県"
+            area: "人吉市"
+          - region: kumamoto_arao
+            pref: "熊本県"
+            area: "荒尾市"
+          - region: oita_oita_c
+            pref: "大分県"
+            area: "大分市"
+          - region: oita_beppu
+            pref: "大分県"
+            area: "別府市"
+          - region: oita_nakatsu
+            pref: "大分県"
+            area: "中津市"
+          - region: oita_saiki
+            pref: "大分県"
+            area: "佐伯市"
+          - region: oita_hita
+            pref: "大分県"
+            area: "日田市"
+          - region: miyazaki_miyazaki_c
+            pref: "宮崎県"
+            area: "宮崎市"
+          - region: miyazaki_miyakonojo
+            pref: "宮崎県"
+            area: "都城市"
+          - region: miyazaki_nobeoka
+            pref: "宮崎県"
+            area: "延岡市"
+          - region: miyazaki_hyuga
+            pref: "宮崎県"
+            area: "日向市"
+          - region: miyazaki_kobayashi
+            pref: "宮崎県"
+            area: "小林市"
+          - region: kagoshima_kagoshima_c
+            pref: "鹿児島県"
+            area: "鹿児島市"
+          - region: kagoshima_kirishima
+            pref: "鹿児島県"
+            area: "霧島市"
+          - region: kagoshima_satsumasendai
+            pref: "鹿児島県"
+            area: "薩摩川内市"
+          - region: kagoshima_kanoya
+            pref: "鹿児島県"
+            area: "鹿屋市"
+          - region: kagoshima_izumi
+            pref: "鹿児島県"
+            area: "出水市"
+          - region: okinawa_naha
+            pref: "沖縄県"
+            area: "那覇市"
+          - region: okinawa_okinawa_c
+            pref: "沖縄県"
+            area: "沖縄市"
+          - region: okinawa_urasoe
+            pref: "沖縄県"
+            area: "浦添市"
+          - region: okinawa_ginowan
+            pref: "沖縄県"
+            area: "宜野湾市"
+          - region: okinawa_nago
+            pref: "沖縄県"
+            area: "名護市"
 
     steps:
       - uses: actions/checkout@v4
@@ -39,13 +732,10 @@ jobs:
           pip install playwright tqdm python-dotenv
           python -m playwright install chromium --with-deps
 
-      - name: スクレイピング（${{ matrix.region }}）
+      - name: スクレイピング（${{ matrix.pref }} ${{ matrix.area }}）
         run: |
           mkdir -p output
-          for pref in ${{ matrix.prefs }}; do
-            echo "=== $pref ==="
-            python scraper_google_maps.py --dry-run --pref "$pref"
-          done
+          python scraper_google_maps.py --dry-run --pref "${{ matrix.pref }}" --area "${{ matrix.area }}"
         env:
           PYTHONUNBUFFERED: "1"
 
@@ -56,7 +746,7 @@ jobs:
           path: output/shops_*.json
           retention-days: 1
 
-  # ── マージ＆コミット（全地方完了後に実行）────────────────────────
+  # ── マージ＆コミット（全市区町村完了後に実行）────────────────────────
   merge:
     needs: scrape
     runs-on: ubuntu-latest
