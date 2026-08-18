@@ -21,7 +21,7 @@ from pathlib import Path
 from dotenv import load_dotenv
 from playwright.sync_api import sync_playwright, TimeoutError as PWTimeout
 from tqdm import tqdm
-
+    
 load_dotenv()
 
 # ============================================================
@@ -54,13 +54,9 @@ PREFECTURES = [
 ]
 
 SEARCH_KEYWORDS = [
-    "自家焙煎 コーヒー",
-    "スペシャルティコーヒー 焙煎",
-    "珈琲 自家焙煎",
-    "コーヒーロースター",
-    "焙煎所",
-    "自家焙煎 珈琲豆",
-    "コーヒー豆 直売",
+    "自家焙煎 カフェ",        # 席あり自家焙煎カフェ
+    "コーヒー豆 自家焙煎",    # 豆販売メインの焙煎所・直売所
+    "コーヒーロースター",      # ロースタリー全般（英語系・スペシャルティ系）
 ]
 
 LAUNCH_ARGS = [
@@ -345,6 +341,8 @@ def extract_shop_detail(page, url: str) -> dict | None:
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--pref", type=str, default=None)
+    parser.add_argument("--area", type=str, default=None,
+                        help="検索エリア（市区町村等）。指定時は「area keyword」で検索し、prefは都道府県ラベルとして使用")
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--keyword", type=str, default=None)
     args = parser.parse_args()
@@ -352,11 +350,16 @@ def main():
     OUTPUT_DIR.mkdir(exist_ok=True)
     target_prefs = [args.pref] if args.pref else PREFECTURES
     keywords = [args.keyword] if args.keyword else SEARCH_KEYWORDS
+    # --area 指定時はそのエリアで検索、未指定時は --pref をそのまま使用
+    search_area = args.area if args.area else None
 
     # 進捗読み込み（再開対応）
     done_queries = load_progress()
     if done_queries:
         log.info(f"進捗復元: {len(done_queries)} クエリ完了済み（スキップ）")
+
+    if search_area:
+        log.info(f"エリア指定モード: {target_prefs[0]} / {search_area}")
 
     # DB接続
     conn = None
@@ -378,7 +381,8 @@ def main():
         try:
             for pref in tqdm(target_prefs, desc="都道府県"):
                 for keyword in keywords:
-                    query = f"{pref} {keyword}"
+                    # --area 指定時はエリア名で検索、未指定時は都道府県名で検索
+                    query = f"{search_area or pref} {keyword}"
 
                     if query in done_queries:
                         log.info(f"スキップ（完了済み）: {query}")
@@ -390,10 +394,11 @@ def main():
                     seen_urls.update(new_urls)
                     log.info(f"  → {len(new_urls)} 件の新規URL")
 
-                    for url in tqdm(new_urls, desc=f"  {pref}", leave=False):
+                    for url in tqdm(new_urls, desc=f"  {search_area or pref}", leave=False):
                         shop = extract_shop_detail(detail_page, url)
                         if not shop:
                             continue
+                        # 都道府県が取れなかった場合は --pref の値をセット
                         if not shop.get("prefecture"):
                             shop["prefecture"] = pref
                         all_shops.append(shop)
