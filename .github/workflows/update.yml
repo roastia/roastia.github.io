@@ -737,6 +737,10 @@ jobs:
       - name: 依存インストール
         run: |
           pip install playwright tqdm python-dotenv
+          # azure.archive.ubuntu.com が落ちているとapt-getが数十分ハングするため
+          # ミラーを archive.ubuntu.com に差し替えてからインストール
+          sudo sed -i 's|http://azure\.archive\.ubuntu\.com|https://archive.ubuntu.com|g' \
+            /etc/apt/apt-mirrors.txt /etc/apt/sources.list.d/*.list /etc/apt/sources.list 2>/dev/null || true
           python -m playwright install chromium --with-deps
 
       - name: スクレイピング（${{ matrix.pref }} ${{ matrix.area }}）
