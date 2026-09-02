@@ -254,6 +254,34 @@ nav a:hover{color:var(--gold);}
 .btn-upload-photo input{display:none;}
 .photo-uploading{font-family:var(--mono);font-size:10px;color:var(--text-dim);padding:8px 0;}
 
+/* コミュニティ情報 */
+.community-section{margin:0 1.5rem 1.5rem;}
+.community-title{font-family:var(--mono);font-size:9px;letter-spacing:.2em;color:var(--gold-dim);text-transform:uppercase;margin-bottom:1rem;display:flex;align-items:center;justify-content:space-between;}
+.btn-add-attr{font-family:var(--mono);font-size:9px;letter-spacing:.1em;background:transparent;border:1px solid var(--border2);color:var(--gold-dim);padding:4px 10px;border-radius:3px;cursor:pointer;transition:all .2s;}
+.btn-add-attr:hover{border-color:var(--gold);color:var(--gold);}
+.community-group{margin-bottom:1.1rem;}
+.community-group-label{font-family:var(--mono);font-size:9px;letter-spacing:.15em;color:var(--text-dim);text-transform:uppercase;margin-bottom:.4rem;}
+.attr-item{display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--border);}
+.attr-item:last-child{border-bottom:none;}
+.attr-value{font-family:var(--serif);font-size:.9rem;color:var(--text);flex:1;}
+.attr-cat{font-family:var(--mono);font-size:8px;padding:2px 6px;border-radius:10px;}
+.attr-cat.standard{background:var(--bg3);color:var(--text-dim);border:1px solid var(--border);}
+.attr-cat.seasonal{background:#fff3e0;color:#a0522d;border:1px solid #d2956a;}
+.attr-status{font-family:var(--mono);font-size:9px;white-space:nowrap;}
+.attr-status.confirmed{color:#2e7d32;}
+.attr-status.stale{color:#b35c00;}
+.attr-status.pending{color:var(--text-dim);}
+.btn-vote{font-family:var(--mono);font-size:9px;background:transparent;border:1px solid var(--border2);color:var(--text-dim);padding:3px 8px;border-radius:3px;cursor:pointer;transition:all .2s;white-space:nowrap;}
+.btn-vote:hover{border-color:#2e7d32;color:#2e7d32;}
+.btn-vote.voted{background:#e8f5e9;border-color:#2e7d32;color:#2e7d32;cursor:default;}
+.community-empty{font-family:var(--sans);font-size:11px;color:var(--text-dim);padding:.3rem 0 .8rem;}
+.community-empty a{color:var(--gold-dim);cursor:pointer;text-decoration:underline;}
+.add-attr-form{background:var(--bg2);border:1px solid var(--border);border-radius:6px;padding:1rem;margin-top:.8rem;}
+.add-attr-form select{width:100%;background:var(--bg);border:1px solid var(--border2);color:var(--text);font-family:var(--serif);font-size:13px;padding:7px 10px;border-radius:4px;outline:none;margin-bottom:.6rem;display:block;}
+.btn-submit-attr{background:#6F4E37;color:#fff;border:none;font-family:var(--sans);font-size:11px;font-weight:600;padding:7px 18px;border-radius:4px;cursor:pointer;transition:opacity .2s;}
+.btn-submit-attr:hover{opacity:.85;}
+.btn-cancel-attr{background:transparent;border:1px solid var(--border2);color:var(--text-dim);font-family:var(--sans);font-size:11px;padding:7px 14px;border-radius:4px;cursor:pointer;}
+
 /* 認証モーダル */
 .auth-overlay{position:fixed;inset:0;background:rgba(61,32,16,.55);z-index:2000;display:flex;align-items:center;justify-content:center;padding:1rem;opacity:0;pointer-events:none;transition:opacity .25s;}
 .auth-overlay.open{opacity:1;pointer-events:all;}
@@ -1430,6 +1458,11 @@ function _openModalWith(shop) {
           <div class="info-block" style="grid-column:1/-1"><div class="info-label">サービス</div><div class="info-value">${svcHtml}</div></div>
         </div>
       </div>
+      <!-- コミュニティ情報セクション -->
+      <div class="community-section" id="community-section-${id}">
+        <div class="community-title"><span>コミュニティ情報</span></div>
+        <div class="community-empty">読み込み中…</div>
+      </div>
       <!-- 個人評価セクション -->
       <div class="rating-section" id="rating-section">
         <div class="rating-title">あなたの評価</div>
@@ -1444,6 +1477,7 @@ function _openModalWith(shop) {
   document.getElementById('modal-overlay').classList.add('open');
   if (window.innerWidth <= 640) document.body.style.overflow = 'hidden';
   loadModalUserData(id);
+  loadCommunityData(id);
   // 詳細パネルが開いた後、ルート表示中なら可視エリアに合わせて再フィット
   if (window.innerWidth > 640) setTimeout(_refitRoute, 320); // スライドアニメ完了後
 }
@@ -1490,6 +1524,182 @@ document.addEventListener('keydown', e => {
     if (routeControl) { map.removeControl(routeControl); routeControl = null; _lastRouteBounds = null; }
   }
 });
+
+/* ════════════════════════
+   コミュニティ情報
+════════════════════════ */
+const ATTR_DEFS = {
+  roast_level:  { label:'焙煎度',         hasCategory:false, options:['浅煎り','中煎り','深煎り'] },
+  origin:       { label:'産地',           hasCategory:true,  options:['エチオピア','コロンビア','ケニア','ブラジル','グアテマラ','インドネシア','コスタリカ','パナマ','ルワンダ','ペルー','その他'] },
+  processing:   { label:'精製方法',       hasCategory:true,  options:['ウォッシュド','ナチュラル','ハニー','アナエロビック','その他'] },
+  sales_style:  { label:'販売スタイル',   hasCategory:false, options:['豆のみ','挽き売りあり'] },
+  min_unit:     { label:'最小購入単位',   hasCategory:false, options:['50g〜','100g〜','150g〜','200g〜','250g〜','500g〜'] },
+  online_sales: { label:'オンライン通販', hasCategory:false, options:['あり','なし'] },
+  cafe_attached:{ label:'カフェ併設',     hasCategory:false, options:['あり','なし'] },
+};
+
+function _attrStatus(item) {
+  const sixMonthsAgo = new Date();
+  sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+  const last = item.lastActivityAt?.toDate?.() || item.submittedAt?.toDate?.();
+  if (last && last < sixMonthsAgo) return 'stale';
+  if ((item.voteCount || 1) >= 3) return 'confirmed';
+  return 'pending';
+}
+
+function _attrStatusHtml(status, votes) {
+  const v = votes || 1;
+  if (status === 'confirmed') return `<span class="attr-status confirmed">✓ 確認済み</span>`;
+  if (status === 'stale')     return `<span class="attr-status stale">⚠ 要確認</span>`;
+  return `<span class="attr-status pending">${v}/3票</span>`;
+}
+
+async function loadCommunityData(shopId) {
+  const container = document.getElementById(`community-section-${shopId}`);
+  if (!container) return;
+  try {
+    const snap = await db.collection('communityAttrs').doc(String(shopId)).collection('items').get();
+    const items = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    _renderCommunity(shopId, items, container);
+  } catch(e) {
+    console.warn('community load error', e);
+    container.innerHTML = '<div class="community-title"><span>コミュニティ情報</span></div><div class="community-empty">読み込めませんでした</div>';
+  }
+}
+
+function _renderCommunity(shopId, items, container) {
+  const uid = currentUser?.uid;
+  const addBtn = uid ? `<button class="btn-add-attr" onclick="openAddAttrForm('${shopId}')">＋ 追加</button>` : '';
+  let html = `<div class="community-title"><span>コミュニティ情報</span>${addBtn}</div>`;
+
+  // type順に並べ直す
+  const grouped = {};
+  for (const item of items) {
+    (grouped[item.type] = grouped[item.type] || []).push(item);
+  }
+
+  let hasAny = false;
+  for (const [type, def] of Object.entries(ATTR_DEFS)) {
+    const list = grouped[type];
+    if (!list || !list.length) continue;
+    hasAny = true;
+    html += `<div class="community-group"><div class="community-group-label">${def.label}</div>`;
+    for (const item of list) {
+      const status = _attrStatus(item);
+      const hasVoted   = uid && (item.voters || []).includes(uid);
+      const isMine     = uid && item.submittedBy === uid;
+      const canVote    = uid && !hasVoted && !isMine;
+      const voteBtn    = canVote   ? `<button class="btn-vote" onclick="voteAttr('${shopId}','${item.id}')">✓ 確認</button>`
+                       : hasVoted  ? `<span class="btn-vote voted">✓ 投票済</span>`
+                       : '';
+      const catBadge   = def.hasCategory && item.category
+        ? `<span class="attr-cat ${item.category}">${item.category==='seasonal'?'シーズナル':'定番'}</span>` : '';
+      html += `<div class="attr-item">
+        <span class="attr-value">${item.value}</span>
+        ${catBadge}
+        ${_attrStatusHtml(status, item.voteCount)}
+        ${voteBtn}
+      </div>`;
+    }
+    html += `</div>`;
+  }
+
+  if (!hasAny) {
+    const loginLink = uid ? '「＋ 追加」から投稿できます。'
+      : '<a onclick="closeModal();openAuthModal()">ログイン</a>して情報を追加しましょう。';
+    html += `<div class="community-empty">まだ情報がありません。${loginLink}</div>`;
+  }
+
+  if (!uid) {
+    html += `<div class="community-empty" style="margin-top:.3rem"><a onclick="closeModal();openAuthModal()">ログイン</a>すると情報の追加・確認投票ができます</div>`;
+  }
+
+  html += `<div id="add-attr-form-${shopId}"></div>`;
+  container.innerHTML = html;
+}
+
+function openAddAttrForm(shopId) {
+  const wrap = document.getElementById(`add-attr-form-${shopId}`);
+  if (!wrap) return;
+  const typeOpts = Object.entries(ATTR_DEFS).map(([k,v])=>`<option value="${k}">${v.label}</option>`).join('');
+  wrap.innerHTML = `
+    <div class="add-attr-form">
+      <div style="font-family:var(--mono);font-size:9px;letter-spacing:.15em;color:var(--gold-dim);text-transform:uppercase;margin-bottom:.7rem">情報を追加</div>
+      <select id="atype-${shopId}" onchange="updateAttrOpts('${shopId}')">${typeOpts}</select>
+      <div id="acat-wrap-${shopId}" style="display:none">
+        <select id="acat-${shopId}" style="margin-bottom:.6rem">
+          <option value="standard">定番</option>
+          <option value="seasonal">シーズナル</option>
+        </select>
+      </div>
+      <select id="aval-${shopId}"></select>
+      <div style="display:flex;gap:8px;margin-top:.8rem">
+        <button class="btn-submit-attr" onclick="submitAttr('${shopId}')">投稿する</button>
+        <button class="btn-cancel-attr" onclick="document.getElementById('add-attr-form-${shopId}').innerHTML=''">キャンセル</button>
+      </div>
+    </div>`;
+  updateAttrOpts(shopId);
+  wrap.scrollIntoView({ behavior:'smooth', block:'nearest' });
+}
+
+function updateAttrOpts(shopId) {
+  const typeEl = document.getElementById(`atype-${shopId}`);
+  const valEl  = document.getElementById(`aval-${shopId}`);
+  const catWrap= document.getElementById(`acat-wrap-${shopId}`);
+  if (!typeEl || !valEl) return;
+  const def = ATTR_DEFS[typeEl.value];
+  valEl.innerHTML = def.options.map(o=>`<option value="${o}">${o}</option>`).join('');
+  catWrap.style.display = def.hasCategory ? 'block' : 'none';
+}
+
+async function submitAttr(shopId) {
+  if (!currentUser) { openAuthModal(); return; }
+  const typeEl = document.getElementById(`atype-${shopId}`);
+  const valEl  = document.getElementById(`aval-${shopId}`);
+  const catEl  = document.getElementById(`acat-${shopId}`);
+  if (!typeEl || !valEl) return;
+
+  const type  = typeEl.value;
+  const value = valEl.value;
+  const def   = ATTR_DEFS[type];
+  const category = def.hasCategory ? (catEl?.value || 'standard') : null;
+
+  // 重複チェック
+  const dup = await db.collection('communityAttrs').doc(String(shopId)).collection('items')
+    .where('type','==',type).where('value','==',value).get();
+  if (!dup.empty) {
+    alert('この情報はすでに登録されています。「✓ 確認」ボタンで投票できます。'); return;
+  }
+
+  const now = firebase.firestore.FieldValue.serverTimestamp();
+  await db.collection('communityAttrs').doc(String(shopId)).collection('items').add({
+    type, value, category,
+    submittedBy: currentUser.uid,
+    submittedAt: now,
+    lastActivityAt: now,
+    voters: [currentUser.uid],
+    voteCount: 1,
+  });
+
+  document.getElementById(`add-attr-form-${shopId}`).innerHTML = '';
+  loadCommunityData(shopId);
+}
+
+async function voteAttr(shopId, attrId) {
+  if (!currentUser) { openAuthModal(); return; }
+  const ref = db.collection('communityAttrs').doc(String(shopId)).collection('items').doc(attrId);
+  const doc = await ref.get();
+  if (!doc.exists) return;
+  const data = doc.data();
+  if ((data.voters||[]).includes(currentUser.uid)) return;
+  if (data.submittedBy === currentUser.uid) { alert('自分が投稿した情報には投票できません'); return; }
+  await ref.update({
+    voters: firebase.firestore.FieldValue.arrayUnion(currentUser.uid),
+    voteCount: firebase.firestore.FieldValue.increment(1),
+    lastActivityAt: firebase.firestore.FieldValue.serverTimestamp(),
+  });
+  loadCommunityData(shopId);
+}
 
 /* ════════════════════════
    お気に入り・個人評価
