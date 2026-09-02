@@ -755,7 +755,7 @@ jobs:
         with:
           name: shops-${{ matrix.region }}
           path: output/shops_*.json
-          retention-days: 1
+          retention-days: 3
 
   # ── マージ＆コミット（全市区町村完了後に実行）────────────────────────
   merge:
