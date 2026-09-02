@@ -199,7 +199,7 @@ nav a:hover{color:var(--gold);}
 .modal-rating-num{font-family:var(--mono);font-size:13px;color:var(--text-dim);}
 .modal-walk{font-family:var(--mono);font-size:11px;color:#555;margin-bottom:1rem;padding:6px 12px;border:1px solid rgba(111,78,55,.2);border-radius:3px;display:inline-block;}
 .modal-tags{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:1.5rem;}
-.modal-info{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-bottom:1.5rem;}
+.modal-info{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-bottom:.5rem;padding:1rem 0;border-top:1px solid var(--border);}
 @media(max-width:500px){.modal-info{grid-template-columns:1fr;}}
 .info-label{font-family:var(--mono);font-size:9px;letter-spacing:.2em;color:var(--gold-dim);text-transform:uppercase;margin-bottom:.5rem;}
 .info-value{font-size:.9rem;color:var(--text);line-height:1.6;}
@@ -254,16 +254,28 @@ nav a:hover{color:var(--gold);}
 .btn-upload-photo input{display:none;}
 .photo-uploading{font-family:var(--mono);font-size:10px;color:var(--text-dim);padding:8px 0;}
 
+/* Googleデータ アコーディオン */
+.accordion-toggle{width:100%;background:var(--bg2);border:1px solid var(--border);border-radius:6px;padding:9px 14px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;font-family:var(--mono);font-size:10px;letter-spacing:.15em;color:var(--text-dim);text-transform:uppercase;transition:background .2s;margin-bottom:1.5rem;}
+.accordion-toggle:hover{background:var(--bg3);}
+.accordion-arrow{transition:transform .25s;font-size:10px;}
+.accordion-toggle.open .accordion-arrow{transform:rotate(180deg);}
+.accordion-body{display:none;margin-top:-.8rem;margin-bottom:1.5rem;}
+.accordion-body.open{display:block;}
+
 /* コミュニティ情報 */
 .community-section{margin:0 1.5rem 1.5rem;}
-.community-title{font-family:var(--mono);font-size:9px;letter-spacing:.2em;color:var(--gold-dim);text-transform:uppercase;margin-bottom:1rem;display:flex;align-items:center;justify-content:space-between;}
-.btn-add-attr{font-family:var(--mono);font-size:9px;letter-spacing:.1em;background:transparent;border:1px solid var(--border2);color:var(--gold-dim);padding:4px 10px;border-radius:3px;cursor:pointer;transition:all .2s;}
-.btn-add-attr:hover{border-color:var(--gold);color:var(--gold);}
-.community-group{margin-bottom:1.1rem;}
-.community-group-label{font-family:var(--mono);font-size:9px;letter-spacing:.15em;color:var(--text-dim);text-transform:uppercase;margin-bottom:.4rem;}
-.attr-item{display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--border);}
-.attr-item:last-child{border-bottom:none;}
-.attr-value{font-family:var(--serif);font-size:.9rem;color:var(--text);flex:1;}
+.community-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.2rem;}
+.community-heading{font-family:var(--serif);font-size:1.1rem;font-weight:600;color:var(--cream);}
+.btn-add-attr{font-family:var(--mono);font-size:9px;letter-spacing:.1em;background:#6F4E37;border:none;color:#fff;padding:6px 14px;border-radius:4px;cursor:pointer;transition:opacity .2s;}
+.btn-add-attr:hover{opacity:.85;}
+.community-group{margin-bottom:1.4rem;}
+.community-group-label{font-family:var(--mono);font-size:9px;letter-spacing:.2em;color:var(--gold-dim);text-transform:uppercase;margin-bottom:.6rem;padding-bottom:.4rem;border-bottom:1px solid var(--border);}
+.attr-cards{display:flex;flex-wrap:wrap;gap:8px;}
+.attr-card{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:8px 12px;display:flex;flex-direction:column;gap:4px;min-width:90px;}
+.attr-card.confirmed{border-color:#a5d6a7;background:#f1f8f1;}
+.attr-card.stale{border-color:#ffe0b2;background:#fff8f0;}
+.attr-card-value{font-family:var(--serif);font-size:1rem;color:var(--text);font-weight:600;}
+.attr-card-meta{display:flex;align-items:center;gap:5px;flex-wrap:wrap;}
 .attr-cat{font-family:var(--mono);font-size:8px;padding:2px 6px;border-radius:10px;}
 .attr-cat.standard{background:var(--bg3);color:var(--text-dim);border:1px solid var(--border);}
 .attr-cat.seasonal{background:#fff3e0;color:#a0522d;border:1px solid #d2956a;}
@@ -271,16 +283,17 @@ nav a:hover{color:var(--gold);}
 .attr-status.confirmed{color:#2e7d32;}
 .attr-status.stale{color:#b35c00;}
 .attr-status.pending{color:var(--text-dim);}
-.btn-vote{font-family:var(--mono);font-size:9px;background:transparent;border:1px solid var(--border2);color:var(--text-dim);padding:3px 8px;border-radius:3px;cursor:pointer;transition:all .2s;white-space:nowrap;}
+.btn-vote{font-family:var(--mono);font-size:9px;background:transparent;border:1px solid var(--border2);color:var(--text-dim);padding:3px 8px;border-radius:3px;cursor:pointer;transition:all .2s;white-space:nowrap;margin-top:2px;align-self:flex-start;}
 .btn-vote:hover{border-color:#2e7d32;color:#2e7d32;}
 .btn-vote.voted{background:#e8f5e9;border-color:#2e7d32;color:#2e7d32;cursor:default;}
-.community-empty{font-family:var(--sans);font-size:11px;color:var(--text-dim);padding:.3rem 0 .8rem;}
+.community-empty{font-family:var(--sans);font-size:12px;color:var(--text-dim);padding:.5rem 0 .8rem;line-height:1.6;}
 .community-empty a{color:var(--gold-dim);cursor:pointer;text-decoration:underline;}
-.add-attr-form{background:var(--bg2);border:1px solid var(--border);border-radius:6px;padding:1rem;margin-top:.8rem;}
-.add-attr-form select{width:100%;background:var(--bg);border:1px solid var(--border2);color:var(--text);font-family:var(--serif);font-size:13px;padding:7px 10px;border-radius:4px;outline:none;margin-bottom:.6rem;display:block;}
-.btn-submit-attr{background:#6F4E37;color:#fff;border:none;font-family:var(--sans);font-size:11px;font-weight:600;padding:7px 18px;border-radius:4px;cursor:pointer;transition:opacity .2s;}
+.add-attr-form{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:1.2rem;margin-top:.8rem;}
+.add-attr-form-title{font-family:var(--mono);font-size:9px;letter-spacing:.15em;color:var(--gold-dim);text-transform:uppercase;margin-bottom:.9rem;}
+.add-attr-form select{width:100%;background:var(--bg);border:1px solid var(--border2);color:var(--text);font-family:var(--serif);font-size:13px;padding:8px 10px;border-radius:4px;outline:none;margin-bottom:.7rem;display:block;}
+.btn-submit-attr{background:#6F4E37;color:#fff;border:none;font-family:var(--sans);font-size:11px;font-weight:600;padding:8px 20px;border-radius:4px;cursor:pointer;transition:opacity .2s;}
 .btn-submit-attr:hover{opacity:.85;}
-.btn-cancel-attr{background:transparent;border:1px solid var(--border2);color:var(--text-dim);font-family:var(--sans);font-size:11px;padding:7px 14px;border-radius:4px;cursor:pointer;}
+.btn-cancel-attr{background:transparent;border:1px solid var(--border2);color:var(--text-dim);font-family:var(--sans);font-size:11px;padding:8px 14px;border-radius:4px;cursor:pointer;}
 
 /* 認証モーダル */
 .auth-overlay{position:fixed;inset:0;background:rgba(61,32,16,.55);z-index:2000;display:flex;align-items:center;justify-content:center;padding:1rem;opacity:0;pointer-events:none;transition:opacity .25s;}
@@ -1450,17 +1463,25 @@ function _openModalWith(shop) {
         ${shop.category?`<div class="modal-category">${shop.category}</div>`:''}
         ${ratingHtml}${walkHtml}
         <div class="modal-tags">${(shop.tags||[]).map(tagLabel).join('')}</div>
-        <div class="modal-info">
-          <div class="info-block"><div class="info-label">住所</div><div class="info-value">${_fmtAddress(shop.address)||'—'}</div></div>
-          <div class="info-block"><div class="info-label">電話番号</div><div class="info-value">${shop.phone?`<a href="tel:${_fmtPhone(shop.phone)}">${_fmtPhone(shop.phone)}</a>`:'—'}</div></div>
-          <div class="info-block"><div class="info-label">営業時間</div><div class="info-value">${hoursHtml||'—'}</div></div>
-          <div class="info-block"><div class="info-label">支払方法</div><div class="info-value">${payHtml}</div></div>
-          <div class="info-block" style="grid-column:1/-1"><div class="info-label">サービス</div><div class="info-value">${svcHtml}</div></div>
+        <button class="accordion-toggle" id="acc-toggle-${id}" onclick="_toggleAccordion('${id}')">
+          <span>Google情報（住所・電話・営業時間 など）</span>
+          <span class="accordion-arrow">▼</span>
+        </button>
+        <div class="accordion-body" id="acc-body-${id}">
+          <div class="modal-info">
+            <div class="info-block"><div class="info-label">住所</div><div class="info-value">${_fmtAddress(shop.address)||'—'}</div></div>
+            <div class="info-block"><div class="info-label">電話番号</div><div class="info-value">${shop.phone?`<a href="tel:${_fmtPhone(shop.phone)}">${_fmtPhone(shop.phone)}</a>`:'—'}</div></div>
+            <div class="info-block"><div class="info-label">営業時間</div><div class="info-value">${hoursHtml||'—'}</div></div>
+            <div class="info-block"><div class="info-label">支払方法</div><div class="info-value">${payHtml}</div></div>
+            <div class="info-block" style="grid-column:1/-1"><div class="info-label">サービス</div><div class="info-value">${svcHtml}</div></div>
+          </div>
         </div>
       </div>
       <!-- コミュニティ情報セクション -->
       <div class="community-section" id="community-section-${id}">
-        <div class="community-title"><span>コミュニティ情報</span></div>
+        <div class="community-header">
+          <div class="community-heading">コミュニティ情報</div>
+        </div>
         <div class="community-empty">読み込み中…</div>
       </div>
       <!-- 個人評価セクション -->
@@ -1538,6 +1559,14 @@ const ATTR_DEFS = {
   cafe_attached:{ label:'カフェ併設',     hasCategory:false, options:['あり','なし'] },
 };
 
+function _toggleAccordion(id) {
+  const toggle = document.getElementById(`acc-toggle-${id}`);
+  const body   = document.getElementById(`acc-body-${id}`);
+  if (!toggle || !body) return;
+  const isOpen = body.classList.toggle('open');
+  toggle.classList.toggle('open', isOpen);
+}
+
 function _attrStatus(item) {
   const sixMonthsAgo = new Date();
   sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
@@ -1570,7 +1599,7 @@ async function loadCommunityData(shopId) {
 function _renderCommunity(shopId, items, container) {
   const uid = currentUser?.uid;
   const addBtn = uid ? `<button class="btn-add-attr" onclick="openAddAttrForm('${shopId}')">＋ 追加</button>` : '';
-  let html = `<div class="community-title"><span>コミュニティ情報</span>${addBtn}</div>`;
+  let html = `<div class="community-header"><div class="community-heading">コミュニティ情報</div>${addBtn}</div>`;
 
   // type順に並べ直す
   const grouped = {};
@@ -1583,25 +1612,27 @@ function _renderCommunity(shopId, items, container) {
     const list = grouped[type];
     if (!list || !list.length) continue;
     hasAny = true;
-    html += `<div class="community-group"><div class="community-group-label">${def.label}</div>`;
+    html += `<div class="community-group"><div class="community-group-label">${def.label}</div><div class="attr-cards">`;
     for (const item of list) {
       const status = _attrStatus(item);
-      const hasVoted   = uid && (item.voters || []).includes(uid);
-      const isMine     = uid && item.submittedBy === uid;
-      const canVote    = uid && !hasVoted && !isMine;
-      const voteBtn    = canVote   ? `<button class="btn-vote" onclick="voteAttr('${shopId}','${item.id}')">✓ 確認</button>`
-                       : hasVoted  ? `<span class="btn-vote voted">✓ 投票済</span>`
-                       : '';
-      const catBadge   = def.hasCategory && item.category
+      const hasVoted = uid && (item.voters || []).includes(uid);
+      const isMine   = uid && item.submittedBy === uid;
+      const canVote  = uid && !hasVoted && !isMine;
+      const voteBtn  = canVote  ? `<button class="btn-vote" onclick="voteAttr('${shopId}','${item.id}')">✓ 確認</button>`
+                     : hasVoted ? `<span class="btn-vote voted">✓ 投票済</span>`
+                     : '';
+      const catBadge = def.hasCategory && item.category
         ? `<span class="attr-cat ${item.category}">${item.category==='seasonal'?'シーズナル':'定番'}</span>` : '';
-      html += `<div class="attr-item">
-        <span class="attr-value">${item.value}</span>
-        ${catBadge}
-        ${_attrStatusHtml(status, item.voteCount)}
+      html += `<div class="attr-card ${status}">
+        <div class="attr-card-value">${item.value}</div>
+        <div class="attr-card-meta">
+          ${catBadge}
+          ${_attrStatusHtml(status, item.voteCount)}
+        </div>
         ${voteBtn}
       </div>`;
     }
-    html += `</div>`;
+    html += `</div></div>`;
   }
 
   if (!hasAny) {
@@ -1624,7 +1655,7 @@ function openAddAttrForm(shopId) {
   const typeOpts = Object.entries(ATTR_DEFS).map(([k,v])=>`<option value="${k}">${v.label}</option>`).join('');
   wrap.innerHTML = `
     <div class="add-attr-form">
-      <div style="font-family:var(--mono);font-size:9px;letter-spacing:.15em;color:var(--gold-dim);text-transform:uppercase;margin-bottom:.7rem">情報を追加</div>
+      <div class="add-attr-form-title">情報を追加</div>
       <select id="atype-${shopId}" onchange="updateAttrOpts('${shopId}')">${typeOpts}</select>
       <div id="acat-wrap-${shopId}" style="display:none">
         <select id="acat-${shopId}" style="margin-bottom:.6rem">
